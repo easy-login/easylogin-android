@@ -52,7 +52,7 @@ public class LineAuthHandler extends AbstractAuthHandler {
             case SUCCESS:
                 // Login successful
                 AuthResult result = new LineAuthResult(lineResult, getAuthSession());
-                getEasyLoginAuth().onProviderAuthSuccess(getProviderName(), result);
+                getEasyLogin().onProviderAuthSuccess(getProviderName(), result);
                 break;
             case CANCEL:
                 // Login canceled by user
@@ -63,7 +63,7 @@ public class LineAuthHandler extends AbstractAuthHandler {
                 Log.e("ERROR", "Login FAILED!");
                 Log.e("ERROR", lineResult.getErrorData().toString());
         }
-        getEasyLoginAuth().onProviderAuthError(getProviderName(),
+        getEasyLogin().onProviderAuthFailure(getProviderName(),
                 new EasyLoginException("Authorized failed, response code: "
                         + lineResult.getResponseCode()));
         return false;

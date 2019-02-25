@@ -5,7 +5,6 @@ import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.v7.app.AppCompatActivity;
-import android.view.View;
 import android.widget.TextView;
 
 import jp.easylogin.android.sdk.AuthDelegate;
@@ -27,12 +26,7 @@ public class MainActivity extends AppCompatActivity implements AuthListener {
         easyLogin.addAuthListener(this);
         easyLogin.setAuthDelegate(delegate);
 
-        findViewById(R.id.line_login_btn).setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                easyLogin.authorize("line");
-            }
-        });
+        findViewById(R.id.line_login_btn).setOnClickListener(v -> easyLogin.authorize("line"));
         textContent = findViewById(R.id.txt_content);
     }
 
@@ -44,7 +38,7 @@ public class MainActivity extends AppCompatActivity implements AuthListener {
 
     @Override
     public void onAuthFailure(String provider, @Nullable Throwable throwable) {
-        String s = "Login failed, " + throwable.getMessage();
+        String s = "Login failed, " + (throwable != null ? throwable.getMessage() : "");
         textContent.setText(s);
     }
 

@@ -9,7 +9,7 @@ public abstract class AbstractAuthHandler implements ProviderAuthHandler {
     private AuthSession authSession;
 
     @Override
-    public void setEasyLoginAuth(EasyLogin easyLogin) {
+    public void setEasyLogin(EasyLogin easyLogin) {
         if (!(easyLogin instanceof EasyLoginImpl)) {
             throw new EasyLoginException("Unexpected EasyLogin," +
                     " please use the provided Factory to create the instance");
@@ -22,7 +22,7 @@ public abstract class AbstractAuthHandler implements ProviderAuthHandler {
         this.authSession = session;
     }
 
-    protected EasyLoginImpl getEasyLoginAuth() {
+    protected EasyLoginImpl getEasyLogin() {
         return this.easyLoginAuth;
     }
 

@@ -11,7 +11,7 @@ public interface ProviderAuthHandler extends LoginDelegate {
 
     int REQUEST_CODE_LINE_AUTH = 100;
 
-    void setEasyLoginAuth(EasyLogin easyLogin);
+    void setEasyLogin(EasyLogin easyLogin);
 
     void setAuthSession(AuthSession authSession);
 

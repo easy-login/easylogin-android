@@ -46,7 +46,7 @@ public class EasyLoginImpl implements EasyLogin {
         try {
             initAuthSession(provider);
             authHandler = ProviderAuthHandler.Factory.create(provider);
-            authHandler.setEasyLoginAuth(this);
+            authHandler.setEasyLogin(this);
             authHandler.setAuthSession(session);
             authHandler.performAuthorize(activity, session.getChannel());
         } catch (IOException e) {
@@ -70,12 +70,12 @@ public class EasyLoginImpl implements EasyLogin {
             String idToken = result.getProviderIdToken().getTokenString();
             this.verifyAccessToken(provider, accessToken, idToken);
             this.onAuthSuccess(provider, result);
-        } catch (IOException e) {
-            throw new EasyLoginException(e);
+        } catch (Exception e) {
+            this.onAuthFailure(provider, e);
         }
     }
 
-    public void onProviderAuthError(String provider, Throwable throwable) {
+    public void onProviderAuthFailure(String provider, Throwable throwable) {
         this.onAuthFailure(provider, throwable);
     }
 
