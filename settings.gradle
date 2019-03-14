@@ -1,1 +1,1 @@
-include ':app', ':easylogin-android-sdk'
+include ':app', ':easylogin-sdk'
