@@ -50,6 +50,6 @@ public class LineIdToken implements ProviderIdToken {
 
     @Override
     public String getTokenString() {
-        throw new UnsupportedOperationException();
+        return "";
     }
 }

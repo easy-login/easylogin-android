@@ -1,14 +1,19 @@
 package jp.easylogin.android.sdk.auth;
 
-import java.io.IOException;
+import android.support.annotation.NonNull;
 
-import jp.easylogin.android.sdk.ApiResponseCode;
 import jp.easylogin.android.sdk.AuthResult;
 import jp.easylogin.android.sdk.EasyAuthToken;
+import jp.easylogin.android.sdk.EasyLoginException;
 import jp.easylogin.android.sdk.EasyProfile;
+import jp.easylogin.android.sdk.api.ApiCallback;
+import jp.easylogin.android.sdk.api.ApiResponse;
+import jp.easylogin.android.sdk.api.ApiResponseCode;
+import jp.easylogin.android.sdk.api.BooleanResponse;
 import jp.easylogin.android.sdk.api.EasyLoginService;
 import jp.easylogin.android.sdk.api.ServiceGenerator;
-import okhttp3.ResponseBody;
+import retrofit2.Call;
+import retrofit2.Callback;
 import retrofit2.Response;
 
 public abstract class AbstractAuthResult implements AuthResult {
@@ -32,26 +37,53 @@ public abstract class AbstractAuthResult implements AuthResult {
     }
 
     @Override
-    public EasyProfile getProfile() {
-        try {
-            Response<EasyProfile> response = service.getAuthorizedProfile(
-                    session.getAuthToken().getTokenString(),
-                    session.getCodeVerifier().getRaw()).execute();
-            return response.isSuccessful() ? response.body() : null;
-        } catch (IOException e) {
-            return null;
-        }
+    public void getProfileAsync(ApiCallback<EasyProfile> callback) {
+        Call<EasyProfile> call = service.getAuthorizedProfile(
+                session.getAuthToken().getTokenString(),
+                session.getCodeVerifier().getRaw());
+        call.enqueue(new Callback<EasyProfile>() {
+            @Override
+            public void onResponse(@NonNull Call<EasyProfile> call,
+                                   @NonNull Response<EasyProfile> response) {
+                final int code = response.code();
+                if (!response.isSuccessful()) {
+                    callback.onResponse(ApiResponse.buildAsError(code,
+                            new EasyLoginException("Server response with status code: " + code)));
+                    return;
+                }
+                callback.onResponse(ApiResponse.buildAsSuccess(code, response.body()));
+            }
+
+            @Override
+            public void onFailure(@NonNull Call<EasyProfile> call, @NonNull Throwable t) {
+                callback.onResponse(ApiResponse.buildAsError(ApiResponseCode.SERVER_ERROR, t));
+            }
+        });
     }
 
     @Override
-    public boolean activateProfile() {
-        try {
-            Response<ResponseBody> response = service.activateProfile(
-                    session.getAuthToken().getTokenString(),
-                    session.getCodeVerifier().getRaw()).execute();
-            return response.isSuccessful();
-        } catch (IOException e) {
-            return false;
-        }
+    public void activateProfileAsync(ApiCallback<Boolean> callback) {
+        Call<BooleanResponse> call = service.activateProfile(
+                session.getAuthToken().getTokenString(),
+                session.getCodeVerifier().getRaw());
+        call.enqueue(new Callback<BooleanResponse>() {
+            @Override
+            public void onResponse(@NonNull Call<BooleanResponse> call,
+                                   @NonNull Response<BooleanResponse> response) {
+                final int code = response.code();
+                if (!response.isSuccessful()) {
+                    callback.onResponse(ApiResponse.buildAsError(code,
+                            new EasyLoginException("Server response with status code: " + code)));
+                    return;
+                }
+                callback.onResponse(ApiResponse.buildAsSuccess(code,
+                        response.body() != null && response.body().isSuccess()));
+            }
+
+            @Override
+            public void onFailure(@NonNull Call<BooleanResponse> call, @NonNull Throwable t) {
+                callback.onResponse(ApiResponse.buildAsError(ApiResponseCode.SERVER_ERROR, t));
+            }
+        });
     }
 }

@@ -1,26 +1,31 @@
 package jp.easylogin.android.sdk.auth;
 
-import android.support.annotation.NonNull;
-
 public class InitAuthResponse {
 
-    @NonNull
-    private final Channel channel;
-    @NonNull
-    private final String state;
+    private Channel channel;
+    private String state;
 
-    public InitAuthResponse(@NonNull Channel channel, @NonNull String state) {
+    public InitAuthResponse() {
+    }
+
+    public InitAuthResponse(Channel channel, String state) {
         this.channel = channel;
         this.state = state;
     }
 
-    @NonNull
     public Channel getChannel() {
         return channel;
     }
 
-    @NonNull
     public String getState() {
         return state;
+    }
+
+    public void setChannel(Channel channel) {
+        this.channel = channel;
+    }
+
+    public void setState(String state) {
+        this.state = state;
     }
 }

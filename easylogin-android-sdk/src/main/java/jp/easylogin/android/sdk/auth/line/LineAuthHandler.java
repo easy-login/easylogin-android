@@ -16,11 +16,14 @@ import jp.easylogin.android.sdk.auth.Channel;
 
 public class LineAuthHandler extends AbstractAuthHandler {
 
+    private static final int REQUEST_CODE_LINE_AUTH = 100;
+
     @Override
-    public void performAuthorize(Activity activity, Channel channel) {
+    public void performAuthorize(Activity activity) {
         try {
-            // App-to-app login
-            LineAuthenticationParams.BotPrompt botPrompt = (channel.getOptions().contains("add_friend"))
+            final Channel channel = getAuthSession().getChannel();
+            LineAuthenticationParams.BotPrompt botPrompt =
+                    (channel.getOptions().contains("add_friend"))
                     ? LineAuthenticationParams.BotPrompt.aggressive : null;
             Intent loginIntent = LineLoginApi.getLoginIntent(
                     activity,
@@ -31,7 +34,7 @@ public class LineAuthHandler extends AbstractAuthHandler {
                             .build());
             activity.startActivityForResult(loginIntent, REQUEST_CODE_LINE_AUTH);
         } catch (Exception e) {
-            Log.e("ERROR", e.toString());
+            Log.e("EasyLogin", e.toString());
         }
     }
 
@@ -43,25 +46,22 @@ public class LineAuthHandler extends AbstractAuthHandler {
     @Override
     public boolean onActivityResult(int requestCode, int resultCode, Intent data) {
         if (requestCode != REQUEST_CODE_LINE_AUTH) {
-            Log.e("ERROR", "Unsupported Request");
+            Log.e("EasyLogin", "Unsupported Request");
             return false;
         }
 
         LineLoginResult lineResult = LineLoginApi.getLoginResultFromIntent(data);
         switch (lineResult.getResponseCode()) {
             case SUCCESS:
-                // Login successful
                 AuthResult result = new LineAuthResult(lineResult, getAuthSession());
                 getEasyLogin().onProviderAuthSuccess(getProviderName(), result);
                 break;
             case CANCEL:
-                // Login canceled by user
-                Log.e("ERROR", "LINE Login Canceled by user.");
+                Log.w("EasyLogin", "LINE Login Canceled by user.");
                 break;
             default:
-                // Login canceled due to other error
-                Log.e("ERROR", "Login FAILED!");
-                Log.e("ERROR", lineResult.getErrorData().toString());
+                Log.e("EasyLogin", "Login FAILED!");
+                Log.e("EasyLogin", lineResult.getErrorData().toString());
         }
         getEasyLogin().onProviderAuthFailure(getProviderName(),
                 new EasyLoginException("Authorized failed, response code: "

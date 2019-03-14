@@ -5,6 +5,8 @@ import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.v7.app.AppCompatActivity;
+import android.util.Log;
+import android.widget.EditText;
 import android.widget.TextView;
 
 import jp.easylogin.android.sdk.AuthDelegate;
@@ -22,18 +24,26 @@ public class MainActivity extends AppCompatActivity implements AuthListener {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
-        final EasyLogin easyLogin = EasyLogin.Factory.create(this, "4");
-        easyLogin.addAuthListener(this);
-        easyLogin.setAuthDelegate(delegate);
+        EditText editAppId = findViewById(R.id.edit_app_id);
 
-        findViewById(R.id.line_login_btn).setOnClickListener(v -> easyLogin.authorize("line"));
+        findViewById(R.id.btn_line_login).setOnClickListener(v -> {
+            EasyLogin easyLogin = EasyLogin.Factory.create(this, editAppId.getText().toString());
+            easyLogin.addAuthListener(this);
+            easyLogin.setAuthDelegate(delegate);
+            easyLogin.authorize("line");
+        });
         textContent = findViewById(R.id.txt_content);
     }
 
     @Override
     public void onAuthSuccess(String provider, @NonNull AuthResult result) {
-        String s = "Login success, socialId: " + result.getProfile().getSocialId();
-        textContent.setText(s);
+        Log.i("EasyLogin", "Auth token: " + result.getAuthToken().getTokenString());
+        result.getProfileAsync(response -> {
+            if (response.isSuccess()) {
+                String s = "Login success, socialId: " + response.getResponseData().getSocialId();
+                textContent.setText(s);
+            }
+        });
     }
 
     @Override
@@ -44,7 +54,7 @@ public class MainActivity extends AppCompatActivity implements AuthListener {
 
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
-        super.onActivityResult(requestCode, resultCode, data);
         this.delegate.onActivityResult(requestCode, resultCode, data);
+        super.onActivityResult(requestCode, resultCode, data);
     }
 }

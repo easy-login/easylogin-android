@@ -1,5 +1,7 @@
 package jp.easylogin.android.sdk;
 
+import jp.easylogin.android.sdk.api.ApiCallback;
+
 public interface AuthResult {
 
     int getResponseCode();
@@ -12,7 +14,7 @@ public interface AuthResult {
 
     boolean isOpenIdSupport();
 
-    EasyProfile getProfile();
+    void getProfileAsync(ApiCallback<EasyProfile> callback);
 
-    boolean activateProfile();
+    void activateProfileAsync(ApiCallback<Boolean> callback);
 }

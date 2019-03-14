@@ -9,13 +9,11 @@ import jp.easylogin.android.sdk.auth.line.LineAuthHandler;
 
 public interface ProviderAuthHandler extends LoginDelegate {
 
-    int REQUEST_CODE_LINE_AUTH = 100;
-
     void setEasyLogin(EasyLogin easyLogin);
 
     void setAuthSession(AuthSession authSession);
 
-    void performAuthorize(Activity activity, Channel channel);
+    void performAuthorize(Activity activity);
 
     String getProviderName();
 

@@ -1,22 +1,36 @@
 package jp.easylogin.android.sdk;
 
-import java.util.Date;
+import com.fasterxml.jackson.annotation.JsonProperty;
 
 public class EasyAuthToken {
 
-    private final String authToken;
-    private final Date expireAt;
+    @JsonProperty("auth_token")
+    private String authToken;
 
-    public EasyAuthToken(String authToken, Date expireAt) {
+    @JsonProperty("expires_in")
+    private long expiresIn;
+
+    public EasyAuthToken() {
+    }
+
+    public EasyAuthToken(String authToken, long expiresIn) {
         this.authToken = authToken;
-        this.expireAt = expireAt;
+        this.expiresIn = expiresIn;
+    }
+
+    public long getExpiresIn() {
+        return expiresIn;
+    }
+
+    public void setExpiresIn(long expiresIn) {
+        this.expiresIn = expiresIn;
     }
 
     public String getTokenString() {
         return authToken;
     }
 
-    public Date getExpireAt() {
-        return expireAt;
+    public void setAuthToken(String authToken) {
+        this.authToken = authToken;
     }
 }

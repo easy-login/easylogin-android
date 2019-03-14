@@ -3,8 +3,8 @@ package jp.easylogin.android.sdk.auth;
 import android.app.Activity;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
+import android.util.Log;
 
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -16,6 +16,8 @@ import jp.easylogin.android.sdk.EasyLogin;
 import jp.easylogin.android.sdk.EasyLoginException;
 import jp.easylogin.android.sdk.api.EasyLoginService;
 import jp.easylogin.android.sdk.api.ServiceGenerator;
+import retrofit2.Call;
+import retrofit2.Callback;
 import retrofit2.Response;
 
 @SuppressWarnings("ConstantConditions")
@@ -43,15 +45,7 @@ public class EasyLoginImpl implements EasyLogin {
         if (this.delegate == null) {
             throw new EasyLoginException("You must set AuthDelegate through setAuthDelegate() first");
         }
-        try {
-            initAuthSession(provider);
-            authHandler = ProviderAuthHandler.Factory.create(provider);
-            authHandler.setEasyLogin(this);
-            authHandler.setAuthSession(session);
-            authHandler.performAuthorize(activity, session.getChannel());
-        } catch (IOException e) {
-            throw new EasyLoginException(e);
-        }
+        initAuthorizeSession(provider);
     }
 
     @Override
@@ -61,44 +55,73 @@ public class EasyLoginImpl implements EasyLogin {
                     " please use the provided Factory to create the instance");
         }
         this.delegate = delegate;
+    }
+
+    private void initAuthorizeSession(String provider) {
+        session = new AuthSession(provider);
+        Call<InitAuthResponse> call = service.authorize(provider, appId,
+                CALLBACK_URI, session.getCodeVerifier().getHashed());
+        call.enqueue(new Callback<InitAuthResponse>() {
+            @Override
+            public void onResponse(@NonNull Call<InitAuthResponse> call,
+                                   @NonNull Response<InitAuthResponse> response) {
+                if (!response.isSuccessful()) {
+                    onAuthFailure(provider, new EasyLoginException(
+                            "Init authorization failed. Status code: " + response.code()));
+                    return;
+                }
+                Log.d("EasyLogin", "Init authorize session success");
+                onInitAuthorizeSuccess(provider, response.body());
+            }
+
+            @Override
+            public void onFailure(@NonNull Call<InitAuthResponse> call, @NonNull Throwable t) {
+                onAuthFailure(provider, t);
+            }
+        });
+    }
+
+    private void onInitAuthorizeSuccess(String provider, InitAuthResponse response) {
+        session.setChannel(response.getChannel());
+        session.setState(response.getState());
+
+        authHandler = ProviderAuthHandler.Factory.create(provider);
         ((AuthDelegateImpl) this.delegate).setAuthHandler(authHandler);
+
+        authHandler.setEasyLogin(this);
+        authHandler.setAuthSession(session);
+        authHandler.performAuthorize(activity);
     }
 
     public void onProviderAuthSuccess(String provider, AuthResult result) {
-        try {
-            String accessToken = result.getProviderAccessToken().getTokenString();
-            String idToken = result.getProviderIdToken().getTokenString();
-            this.verifyAccessToken(provider, accessToken, idToken);
-            this.onAuthSuccess(provider, result);
-        } catch (Exception e) {
-            this.onAuthFailure(provider, e);
-        }
+        final String accessToken = result.getProviderAccessToken().getTokenString();
+        final String idToken = result.getProviderIdToken().getTokenString();
+
+        Call<EasyAuthToken> call = service.verifyToken(
+                provider, accessToken, idToken, session.getState());
+        call.enqueue(new Callback<EasyAuthToken>() {
+            @Override
+            public void onResponse(@NonNull Call<EasyAuthToken> call,
+                                   @NonNull Response<EasyAuthToken> response) {
+                if (!response.isSuccessful()) {
+                    onAuthFailure(provider, new EasyLoginException(
+                            "Verify access token failed. Status code: " + response.code()));
+                    return;
+                }
+                Log.d("EasyLogin", "Verify token success");
+                session.setAuthToken(response.body());
+                onAuthSuccess(provider, result);
+            }
+
+            @Override
+            public void onFailure(@NonNull Call<EasyAuthToken> call, @NonNull Throwable t) {
+                onAuthFailure(provider, t);
+            }
+        });
     }
 
     public void onProviderAuthFailure(String provider, Throwable throwable) {
         this.onAuthFailure(provider, throwable);
-    }
-
-    private void initAuthSession(String provider) throws IOException {
-        this.session = new AuthSession(provider);
-        Response<InitAuthResponse> response = service.authorize(provider, appId, CALLBACK_URI,
-                session.getCodeVerifier().getHashed()).execute();
-        if (!response.isSuccessful())
-            throw new EasyLoginException("Init authorization failed. Status code: " + response.code());
-
-        InitAuthResponse authResponse = response.body();
-        session.setChannel(authResponse.getChannel());
-        session.setState(authResponse.getState());
-    }
-
-    private void verifyAccessToken(String provider, String accessToken, String idToken) throws IOException {
-        Response<EasyAuthToken> response = service.verifyToken(
-                provider, accessToken, idToken, session.getState()).execute();
-        if (!response.isSuccessful())
-            throw new EasyLoginException("Verify access token failed. Status code: " + response.code());
-
-        EasyAuthToken authToken = response.body();
-        session.setAuthToken(authToken);
     }
 
     @Override
