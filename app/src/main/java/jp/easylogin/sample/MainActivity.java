@@ -13,6 +13,8 @@ import jp.easylogin.sdk.AuthDelegate;
 import jp.easylogin.sdk.AuthListener;
 import jp.easylogin.sdk.AuthResult;
 import jp.easylogin.sdk.EasyLogin;
+import jp.easylogin.sdk.EasyProfile;
+import jp.easylogin.sdk.common.Utils;
 
 public class MainActivity extends AppCompatActivity implements AuthListener {
 
@@ -37,21 +39,21 @@ public class MainActivity extends AppCompatActivity implements AuthListener {
 
     @Override
     public void onAuthSuccess(String provider, @NonNull AuthResult result) {
-        Log.i("EasyLogin", "Auth token: " + result.getAuthToken().getTokenString());
+        Log.i("EasyLoginDemo", "Auth token: " + result.getAuthToken().getTokenString());
         result.getProfileAsync(response -> {
             if (response.isSuccess()) {
-                String s = "Login success, socialId: " + response.getResponseData().getSocialId();
+                EasyProfile profile = response.getResponseData();
+                String s = Utils.toJson(profile);
                 textContent.setText(s);
-                Log.i("EasyLogin", s);
             }
         });
     }
 
     @Override
     public void onAuthFailure(String provider, @Nullable Throwable throwable) {
-        String s = "Login failed, " + (throwable != null ? throwable.getMessage() : "");
+        String s = throwable != null ? throwable.getMessage() : "";
         textContent.setText(s);
-        Log.w("EasyLogin", s);
+        Log.w("EasyLoginDemo", s);
     }
 
     @Override

@@ -55,7 +55,7 @@ public class LineAuthHandler extends AbstractAuthHandler {
             case SUCCESS:
                 AuthResult result = new LineAuthResult(lineResult, getAuthSession());
                 getEasyLogin().onProviderAuthSuccess(getProviderName(), result);
-                break;
+                return false;
             case CANCEL:
                 Log.w("EasyLoginSDK", "LINE Login canceled by user.");
                 break;
