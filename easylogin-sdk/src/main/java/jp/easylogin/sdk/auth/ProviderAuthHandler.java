@@ -2,12 +2,11 @@ package jp.easylogin.sdk.auth;
 
 import android.app.Activity;
 
-import com.linecorp.linesdk.LoginDelegate;
-
+import jp.easylogin.sdk.AuthDelegate;
 import jp.easylogin.sdk.EasyLogin;
 import jp.easylogin.sdk.auth.line.LineAuthHandler;
 
-public interface ProviderAuthHandler extends LoginDelegate {
+public interface ProviderAuthHandler extends AuthDelegate {
 
     void setEasyLogin(EasyLogin easyLogin);
 

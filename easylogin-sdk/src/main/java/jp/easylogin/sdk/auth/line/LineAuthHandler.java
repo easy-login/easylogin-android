@@ -46,7 +46,7 @@ public class LineAuthHandler extends AbstractAuthHandler {
     @Override
     public boolean onActivityResult(int requestCode, int resultCode, Intent data) {
         if (requestCode != REQUEST_CODE_LINE_AUTH) {
-            Log.d("EasyLoginSDK", "Unsupported Request");
+            Log.d("EasyLoginSDK", "Unsupported Request Code");
             return false;
         }
 
@@ -55,7 +55,7 @@ public class LineAuthHandler extends AbstractAuthHandler {
             case SUCCESS:
                 AuthResult result = new LineAuthResult(lineResult, getAuthSession());
                 getEasyLogin().onProviderAuthSuccess(getProviderName(), result);
-                return false;
+                return true;
             case CANCEL:
                 Log.w("EasyLoginSDK", "LINE Login canceled by user.");
                 break;
@@ -66,6 +66,6 @@ public class LineAuthHandler extends AbstractAuthHandler {
         getEasyLogin().onProviderAuthFailure(getProviderName(),
                 new EasyLoginException("LINE Login failed, response code: "
                         + lineResult.getResponseCode()));
-        return false;
+        return true;
     }
 }

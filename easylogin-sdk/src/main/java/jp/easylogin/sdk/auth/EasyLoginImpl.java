@@ -58,8 +58,10 @@ public class EasyLoginImpl implements EasyLogin {
 
     private void initAuthorizeSession(String provider) {
         session = new AuthSession(provider);
-        Call<InitAuthResponse> call = service.authorize(provider, appId,
-                CALLBACK_URI, session.getCodeVerifier().getHashed());
+        Call<InitAuthResponse> call = service.authorize(
+                provider, appId,
+                CALLBACK_URI,
+                session.getCodeVerifier().getHashed());
         call.enqueue(new Callback<InitAuthResponse>() {
             @Override
             public void onResponse(@NonNull Call<InitAuthResponse> call,

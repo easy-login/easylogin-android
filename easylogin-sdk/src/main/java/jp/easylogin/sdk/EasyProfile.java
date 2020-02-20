@@ -2,11 +2,12 @@ package jp.easylogin.sdk;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 
+import java.io.Serializable;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
 
-public class EasyProfile {
+public class EasyProfile implements Serializable {
 
     @JsonProperty("created_at")
     private Date createdAt;

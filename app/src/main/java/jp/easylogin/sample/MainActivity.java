@@ -1,5 +1,6 @@
 package jp.easylogin.sample;
 
+import android.app.Activity;
 import android.content.Intent;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
@@ -18,6 +19,8 @@ import jp.easylogin.sdk.common.Utils;
 
 public class MainActivity extends AppCompatActivity implements AuthListener {
 
+    private static final int REGISTER_CODE = 1313;
+
     private final AuthDelegate delegate = AuthDelegate.Factory.create();
     private TextView textContent;
 
@@ -29,6 +32,7 @@ public class MainActivity extends AppCompatActivity implements AuthListener {
         EditText editAppId = findViewById(R.id.edit_app_id);
 
         findViewById(R.id.btn_line_login).setOnClickListener(v -> {
+            textContent.setText(R.string.processing);
             EasyLogin easyLogin = EasyLogin.Factory.create(this, editAppId.getText().toString());
             easyLogin.addAuthListener(this);
             easyLogin.setAuthDelegate(delegate);
@@ -41,10 +45,18 @@ public class MainActivity extends AppCompatActivity implements AuthListener {
     public void onAuthSuccess(String provider, @NonNull AuthResult result) {
         Log.i("EasyLoginDemo", "Auth token: " + result.getAuthToken().getTokenString());
         result.getProfileAsync(response -> {
-            if (response.isSuccess()) {
-                EasyProfile profile = response.getResponseData();
-                String s = Utils.toJson(profile);
-                textContent.setText(s);
+            if (!response.isSuccess()) {
+                String err = response.getError().getMessage();
+                textContent.setText(err);
+                return;
+            }
+
+            EasyProfile profile = response.getResponseData();
+            if (!profile.isVerified()) {
+                Intent i = new Intent(this, RegisterActivity.class);
+                i.putExtra("profile", profile);
+                i.putExtra("auth_result", result);
+                startActivity(i);
             }
         });
     }
@@ -58,7 +70,19 @@ public class MainActivity extends AppCompatActivity implements AuthListener {
 
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
-        this.delegate.onActivityResult(requestCode, resultCode, data);
-        super.onActivityResult(requestCode, resultCode, data);
+        if (!this.delegate.onActivityResult(requestCode, resultCode, data)) {
+            switch (requestCode) {
+                case REGISTER_CODE:
+                    if (resultCode == Activity.RESULT_CANCELED) {
+                        textContent.setText("");
+                        return;
+                    }
+                    EasyProfile profile = (EasyProfile) getIntent().getSerializableExtra("data");
+                    String s = Utils.toJson(profile);
+                    textContent.setText(s);
+                default:
+                    super.onActivityResult(requestCode, resultCode, data);
+            }
+        }
     }
 }

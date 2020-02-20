@@ -35,8 +35,8 @@ class CodeVerifier {
     private static String sha256ToString(String code) {
         try {
             MessageDigest digest = MessageDigest.getInstance("SHA-256");
-            byte[] encodedhash = digest.digest(code.getBytes(Charset.defaultCharset()));
-            return Utils.byteArrayToHex(encodedhash);
+            byte[] encodedHash = digest.digest(code.getBytes(Charset.defaultCharset()));
+            return Utils.byteArrayToHex(encodedHash);
         } catch (NoSuchAlgorithmException e) {
             throw new RuntimeException(e);
         }

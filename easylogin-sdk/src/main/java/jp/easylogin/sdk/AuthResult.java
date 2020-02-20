@@ -1,8 +1,10 @@
 package jp.easylogin.sdk;
 
+import java.io.Serializable;
+
 import jp.easylogin.sdk.api.ApiCallback;
 
-public interface AuthResult {
+public interface AuthResult extends Serializable {
 
     int getResponseCode();
 
