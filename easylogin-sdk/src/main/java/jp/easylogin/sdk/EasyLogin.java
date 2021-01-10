@@ -1,7 +1,7 @@
 package jp.easylogin.sdk;
 
 import android.app.Activity;
-import android.support.annotation.NonNull;
+import androidx.annotation.NonNull;
 
 import jp.easylogin.sdk.auth.EasyLoginImpl;
 

@@ -1,6 +1,6 @@
 package jp.easylogin.sdk.auth;
 
-import android.support.annotation.NonNull;
+import androidx.annotation.NonNull;
 
 import jp.easylogin.sdk.AuthResult;
 import jp.easylogin.sdk.EasyAuthToken;
