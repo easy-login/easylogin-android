@@ -71,17 +71,16 @@ public class MainActivity extends AppCompatActivity implements AuthListener {
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         if (!this.delegate.onActivityResult(requestCode, resultCode, data)) {
-            switch (requestCode) {
-                case REGISTER_CODE:
-                    if (resultCode == Activity.RESULT_CANCELED) {
-                        textContent.setText("");
-                        return;
-                    }
-                    EasyProfile profile = (EasyProfile) getIntent().getSerializableExtra("data");
-                    String s = Utils.toJson(profile);
-                    textContent.setText(s);
-                default:
-                    super.onActivityResult(requestCode, resultCode, data);
+            if (requestCode == REGISTER_CODE) {
+                if (resultCode == Activity.RESULT_CANCELED) {
+                    textContent.setText("");
+                    return;
+                }
+                EasyProfile profile = (EasyProfile) getIntent().getSerializableExtra("data");
+                String s = Utils.toJson(profile);
+                textContent.setText(s);
+            } else {
+                super.onActivityResult(requestCode, resultCode, data);
             }
         }
     }
